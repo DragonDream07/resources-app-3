@@ -1,212 +1,231 @@
-# E-Commerce Backend API
+# Shop — Frontend
 
-A full-featured REST API for an e-commerce platform built with **Express**, **Knex**, and **PostgreSQL**. Search is powered by **Elasticsearch**.
-
----
-
-## Table of Contents
-
-1. [Prerequisites](#prerequisites)
-2. [Quick Start](#quick-start)
-3. [Environment Variables](#environment-variables)
-4. [Migration Commands](#migration-commands)
-5. [Seed Commands](#seed-commands)
-6. [Running Tests](#running-tests)
-7. [Module Dependency Direction (ADR)](#module-dependency-direction-adr)
-8. [Project Structure](#project-structure)
+A React + Vite storefront with Tailwind CSS, React Query, and React Router.
 
 ---
 
 ## Prerequisites
 
-| Tool | Minimum version |
-|------|-----------------|
-| Node.js | 18.x |
-| PostgreSQL | 14.x |
-| Elasticsearch | 8.x |
-| Docker (optional) | 24.x |
+| Tool | Version |
+|------|---------|
+| Node.js | >= 18 |
+| npm | >= 9 |
 
 ---
 
-## Quick Start
+## Setup
 
 ```bash
-# 1. Clone and install dependencies
-git clone <repo-url>
-cd ecommerce-backend
+# 1. Install dependencies
 npm install
 
-# 2. Copy the environment template and fill in your values
+# 2. Copy the environment template
 cp .env.example .env
 
-# 3. Start PostgreSQL and Elasticsearch (Docker shortcut)
-docker-compose up -d
+# 3. Fill in the values in .env (see Environment Variables below)
 
-# 4. Run database migrations
-npm run migrate
-
-# 5. Seed reference data
-npm run seed
-
-# 6. Start the development server
+# 4. Start the development server
 npm run dev
 ```
 
-The API is available at `http://localhost:3000` by default.
+The app will be available at `http://localhost:5173` by default.  
+All requests to `/api/*` are proxied to the backend dev server at `http://localhost:4000`.
 
 ---
 
 ## Environment Variables
 
-Copy `.env.example` to `.env` and set each variable before starting the server.
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `VITE_API_BASE_URL` | Yes | Full base URL of the backend API, e.g. `http://localhost:4000/api` |
+| `VITE_APP_TITLE` | No | Browser tab title. Defaults to `Shop` |
+| `VITE_PAYMENT_KEY` | No | Public key for the payment gateway (Razorpay) |
+| `VITE_MOCK_PAYMENTS` | No | Set to `true` to use the mock payment adapter in development |
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `PORT` | No | `3000` | Port the Express server listens on |
-| `NODE_ENV` | No | `development` | Runtime environment (`development` \| `test` \| `production`) |
-| `DB_HOST` | Yes | `127.0.0.1` | PostgreSQL host |
-| `DB_PORT` | No | `5432` | PostgreSQL port |
-| `DB_NAME` | Yes | `ecommerce_dev` | PostgreSQL database name |
-| `DB_USER` | Yes | `postgres` | PostgreSQL user |
-| `DB_PASSWORD` | Yes | — | PostgreSQL password |
-| `TEST_DB_HOST` | No | `127.0.0.1` | PostgreSQL host for test suite |
-| `TEST_DB_PORT` | No | `5432` | PostgreSQL port for test suite |
-| `TEST_DB_NAME` | No | `ecommerce_test` | PostgreSQL database name for test suite |
-| `TEST_DB_USER` | No | `postgres` | PostgreSQL user for test suite |
-| `TEST_DB_PASSWORD` | No | — | PostgreSQL password for test suite |
-| `JWT_SECRET` | Yes | — | Secret used to sign JWTs (use a long random string) |
-| `JWT_ACCESS_EXPIRY` | No | `15m` | Access token lifetime |
-| `JWT_REFRESH_EXPIRY` | No | `7d` | Refresh token lifetime |
-| `BCRYPT_SALT_ROUNDS` | No | `12` | Bcrypt work factor |
-| `ELASTICSEARCH_NODE` | Yes | `http://localhost:9200` | Elasticsearch node URL |
-| `ELASTICSEARCH_INDEX_PRODUCTS` | No | `products` | Products index name |
-| `RATE_LIMIT_WINDOW_MS` | No | `900000` | Rate-limit window in milliseconds |
-| `RATE_LIMIT_MAX` | No | `100` | Max requests per window per IP |
-| `LOG_LEVEL` | No | `info` | Winston log level |
-| `LOG_DIR` | No | `logs` | Directory for log files |
-| `CORS_ORIGINS` | No | `http://localhost:3001` | Comma-separated allowed origins |
-| `PAYMENT_ADAPTER` | No | `mock` | Payment adapter (`mock`) |
-| `ADMIN_EMAIL` | No | `admin@example.com` | Admin seed user e-mail |
-| `ADMIN_PASSWORD` | No | `Admin@123` | Admin seed user password |
+All variables must be prefixed with `VITE_` to be exposed to the browser bundle.
 
 ---
 
-## Migration Commands
+## Scripts
 
-```bash
-# Apply all pending migrations
-npm run migrate
-# Equivalent: knex migrate:latest
-
-# Roll back the last batch of migrations
-npm run migrate:rollback
-# Equivalent: knex migrate:rollback
-
-# Create a new migration file
-npm run migrate:make -- <migration_name>
-# Equivalent: knex migrate:make <migration_name>
-```
-
-Migration files live in `src/db/migrations/` and are numbered sequentially (`001_`, `002_`, …).
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev server with HMR |
+| `npm run build` | Production build to `dist/` |
+| `npm run preview` | Serve the production build locally |
+| `npm run lint` | Run ESLint across all JS/JSX files |
+| `npm test` | Run Jest unit tests |
+| `npm run test:coverage` | Run tests with coverage report |
 
 ---
 
-## Seed Commands
+## Design Tokens
 
-```bash
-# Run all seed files in order
-npm run seed
-# Equivalent: knex seed:run
+Design tokens live in `src/config/tailwind.config.js` and are merged into the root `tailwind.config.js`.
 
-# Create a new seed file
-npm run seed:make -- <seed_name>
-# Equivalent: knex seed:make <seed_name>
+### Using tokens in components
+
+```jsx
+// Tailwind utility classes (preferred)
+<button className="bg-primary-600 text-white rounded-lg px-4 py-2 hover:bg-primary-700">
+  Add to cart
+</button>
+
+// Combining classes conditionally with clsx + tailwind-merge
+import { clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+const cn = (...inputs) => twMerge(clsx(inputs));
+
+<div className={cn('base-class', isActive && 'active-class')} />
 ```
 
-Seed files live in `src/db/seeds/` and are prefixed (`01_`, `02_`, …) to control execution order.
+Token categories defined in the theme extension:
+
+- **Colors** — `primary`, `secondary`, `neutral`, `success`, `warning`, `error`
+- **Typography** — font families, sizes, weights via Tailwind `font-*` utilities
+- **Spacing** — extended spacing scale
+- **Border radius** — `rounded-*` utilities
+- **Shadows** — `shadow-*` utilities
 
 ---
 
-## Running Tests
+## Route Map
 
-```bash
-# Run the full test suite (sequential, shares a single DB connection pool)
-npm test
-
-# Run tests and collect coverage
-npm run test:coverage
-```
-
-Coverage thresholds (branches 70 %, functions/lines/statements 75 %) are enforced and will fail the build if not met.
+| Path | Component | Auth |
+|------|-----------|------|
+| `/` | `Home` | Public |
+| `/products` | `ProductListing` | Public |
+| `/categories/:categoryId` | `CategoryProductListing` | Public |
+| `/categories/:categoryId/products` | `CategoryProductListing` | Public |
+| `/search` | `SearchResults` | Public |
+| `/products/:productId` | `ProductDetail` | Public |
+| `/cart` | `Cart` | Public |
+| `/checkout/address` | `CheckoutAddress` | Public |
+| `/checkout/review` | `CheckoutReview` | Public |
+| `/checkout/payment` | `CheckoutPayment` | Public |
+| `/checkout/confirmation` | `CheckoutConfirmation` | Public |
+| `/checkout/guest-register` | `GuestPostCheckoutRegister` | Guest |
+| `/auth/login` | `Login` | Guest |
+| `/auth/register` | `Register` | Guest |
+| `/auth/forgot-password` | `ForgotPassword` | Guest |
+| `/auth/reset-password` | `ResetPassword` | Guest |
+| `/account` | `AccountOverview` | Protected |
+| `/account/profile` | `AccountProfile` | Protected |
+| `/account/addresses` | `AccountAddresses` | Protected |
+| `/account/addresses/new` | `AddressNew` | Protected |
+| `/account/addresses/:addressId` | `AddressEdit` | Protected |
+| `/account/orders` | `OrderHistory` | Protected |
+| `/account/orders/:orderId` | `OrderDetail` | Protected |
+| `/account/orders/:orderId/return` | `ReturnRequest` | Protected |
+| `/account/notifications` | `Notifications` | Protected |
+| `/admin` | `AdminDashboard` | Admin |
+| `/admin/reports` | `AdminReports` | Admin |
+| `/admin/orders` | `AdminOrderList` | Admin |
+| `/admin/orders/:orderId` | `AdminOrderDetail` | Admin |
+| `/admin/products` | `AdminProductList` | Admin |
+| `/admin/products/new` | `AdminProductNew` | Admin |
+| `/admin/products/:productId/edit` | `AdminProductEdit` | Admin |
+| `/admin/categories` | `AdminCategoryList` | Admin |
+| `/admin/categories/new` | `AdminCategoryNew` | Admin |
+| `/admin/categories/:categoryId/edit` | `AdminCategoryEdit` | Admin |
+| `/admin/brands` | `AdminBrandList` | Admin |
+| `/admin/brands/new` | `AdminBrandNew` | Admin |
+| `/admin/brands/:brandId/edit` | `AdminBrandEdit` | Admin |
+| `/admin/promotions` | `AdminPromotionList` | Admin |
+| `/admin/promotions/new` | `AdminPromotionNew` | Admin |
+| `/admin/promotions/:promoId/edit` | `AdminPromotionEdit` | Admin |
+| `/admin/returns` | `AdminReturnList` | Admin |
+| `/admin/returns/:returnRequestId` | `AdminReturnDetail` | Admin |
+| `/admin/users` | `AdminUserList` | Admin |
+| `/admin/users/:userId` | `AdminUserDetail` | Admin |
+| `*` | `NotFound` | Public |
 
 ---
 
-## Module Dependency Direction (ADR)
+## API Endpoints Reference
 
-### Decision
+All requests go through the axios client configured in `src/api/client.js`. The base URL is read from `VITE_API_BASE_URL`.
 
-All dependencies between layers must flow **inward** — from higher-level modules toward lower-level infrastructure. Reverse or lateral dependencies are forbidden and are enforced by ESLint (`import/no-restricted-paths` and `import/no-cycle`).
-
-### Allowed dependency direction
-
-```
-  HTTP Requests
-       │
-       ▼
-  src/modules/*          (routes → controllers → services)
-       │
-       ▼
-  src/db/repositories    (services call repositories)
-       │
-       ▼
-  src/db/client.js       (Knex instance)
-       │
-       ▼
-  PostgreSQL / Elasticsearch
-```
-
-### Supporting layers (may be imported by any layer above them)
-
-```
-  src/config/*           ← read by modules, middleware, db client
-  src/utils/*            ← read by modules, middleware
-  src/middleware/*       ← mounted by app.js; must NOT import from modules
-```
-
-### Rationale
-
-- **Testability** — services and repositories can be unit-tested without starting the HTTP layer.
-- **Replaceability** — swapping the database client or a payment adapter requires changes only at the adapter boundary.
-- **Cycle prevention** — circular imports cause subtle runtime bugs in Node.js; `import/no-cycle` makes them a build error.
-
-### Consequences
-
-- A module's service must not `require` another module's service directly; use the repository layer or an explicit adapter interface.
-- Middleware must not `require` application modules; shared logic belongs in `src/utils`.
-- Config files must not reference DB or module code.
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/search` | Full-text product search |
+| GET | `/search/suggest` | Autocomplete suggestions |
+| GET | `/products` | List products |
+| GET | `/products/:productId` | Get single product |
+| POST | `/products` | Create product (Admin) |
+| PUT | `/products/:productId` | Update product (Admin) |
+| DELETE | `/products/:productId` | Delete product (Admin) |
+| POST | `/products/:productId/images` | Upload product images (Admin) |
+| GET | `/products/:productId/images` | List product images |
+| POST | `/products/:productId/skus` | Create SKU (Admin) |
+| GET | `/products/:productId/skus` | List SKUs |
+| PUT | `/products/:productId/skus/:skuId` | Update SKU (Admin) |
+| GET | `/categories` | List categories |
+| GET | `/categories/:categoryId` | Get category |
+| GET | `/categories/:categoryId/products` | Products by category |
+| POST | `/categories` | Create category (Admin) |
+| PUT | `/categories/:categoryId` | Update category (Admin) |
+| DELETE | `/categories/:categoryId` | Delete category (Admin) |
+| GET | `/brands` | List brands |
+| GET | `/brands/:brandId` | Get brand |
+| POST | `/brands` | Create brand (Admin) |
+| GET | `/carts/:cartId` | Get cart |
+| POST | `/carts/:cartId/items` | Add item to cart |
+| PATCH | `/carts/:cartId/items/:itemId` | Update cart item |
+| DELETE | `/carts/:cartId/items/:itemId` | Remove cart item |
+| POST | `/carts/:cartId/promo` | Apply promo code |
+| GET | `/checkout/review` | Checkout review |
+| POST | `/checkout/address` | Save checkout address |
+| GET | `/serviceability` | Check pin-code serviceability |
+| POST | `/checkout/place-order` | Place order |
+| POST | `/payments/initiate` | Initiate payment |
+| GET | `/orders` | List orders |
+| GET | `/orders/:orderId` | Get order |
+| POST | `/orders/:orderId/cancel` | Cancel order |
+| POST | `/orders/:orderId/advance` | Advance order status (Admin) |
+| GET | `/orders/:orderId/timeline` | Order status timeline |
+| GET | `/orders/:orderId/tracking` | Order tracking info |
+| GET | `/orders/:orderId/refunds` | Order refunds |
+| POST | `/orders/:orderId/return-requests` | Create return request |
+| GET | `/return-requests` | List return requests (Admin) |
+| GET | `/return-requests/:returnRequestId` | Get return request |
+| POST | `/return-requests/:returnRequestId/review` | Review return request (Admin) |
+| GET | `/promo-codes` | List promo codes (Admin) |
+| POST | `/auth/guest-register` | Register as guest |
+| POST | `/auth/login` | Login |
+| POST | `/auth/register` | Register |
+| POST | `/auth/forgot-password` | Request password reset |
+| POST | `/auth/reset-password` | Reset password |
+| GET | `/users/me` | Get current user |
+| PATCH | `/users/me` | Update current user |
+| POST | `/users/me/change-password` | Change password |
+| GET | `/users/me/addresses` | List addresses |
+| POST | `/users/me/addresses` | Create address |
+| GET | `/users/me/addresses/:addressId` | Get address |
+| PUT | `/users/me/addresses/:addressId` | Update address |
+| DELETE | `/users/me/addresses/:addressId` | Delete address |
+| GET | `/notifications` | List notifications |
+| POST | `/notifications/read-all` | Mark all notifications read |
+| POST | `/notifications/:notificationId/read` | Mark notification read |
+| GET | `/admin/reports` | Admin reports |
 
 ---
 
 ## Project Structure
 
 ```
-.
-├── src/
-│   ├── app.js                  # Express app factory (middleware + routes)
-│   ├── server.js               # HTTP server entry point
-│   ├── config/                 # Environment-derived configuration objects
-│   ├── db/
-│   │   ├── client.js           # Knex singleton
-│   │   ├── migrations/         # Numbered schema migrations
-│   │   ├── seeds/              # Ordered seed data
-│   │   └── repositories/       # Data-access layer
-│   ├── middleware/             # Express middleware (auth, rate-limit, errors…)
-│   ├── modules/                # Feature modules (auth, cart, orders…)
-│   └── utils/                 # Pure utility functions (logger, pagination…)
-├── knexfile.js                 # Knex CLI configuration
-├── jest.config.js              # Jest configuration
-├── .eslintrc.js                # ESLint rules
-├── .env.example                # Environment variable template
-├── docker-compose.yml          # Local dev services (Postgres, Elasticsearch)
-└── package.json
+src/
+  api/           # Axios client and per-resource API functions
+  assets/        # Static images and icons
+  components/    # Reusable UI components
+  config/        # Tailwind token extensions, app config
+  hooks/         # Custom React hooks
+  pages/         # Route-level page components
+  routes/        # Route guards and route definitions
+  store/         # Global state (context / zustand)
+  utils/         # Utility functions
+  main.jsx       # App entry point
+  App.jsx        # Root component with router and providers
+  index.css      # Global styles / Tailwind directives
 ```
