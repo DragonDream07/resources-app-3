@@ -26,15 +26,17 @@ const PromoCodeForm = ({
 
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
+      const expiryDate =
+        initialData.expiry_date && typeof initialData.expiry_date === 'string'
+          ? initialData.expiry_date.split('T')[0]
+          : '';
       setForm({
         code: initialData.code || '',
         discount_type: initialData.discount_type || 'percentage',
         discount_value: initialData.discount_value || '',
         min_order_value: initialData.min_order_value || '',
         max_discount_amount: initialData.max_discount_amount || '',
-        expiry_date: initialData.expiry_date
-          ? initialData.expiry_date.split('T')[0]
-          : '',
+        expiry_date: expiryDate,
         usage_limit: initialData.usage_limit || '',
         is_active: initialData.is_active !== undefined ? initialData.is_active : true,
       });
@@ -61,6 +63,11 @@ const PromoCodeForm = ({
         expiry_date: form.expiry_date || null,
       });
     }
+  };
+
+  const getSubmitLabel = () => {
+    if (submitting) return mode === 'create' ? 'Creating…' : 'Saving…';
+    return mode === 'create' ? 'Create Promo Code' : 'Save Changes';
   };
 
   return (
@@ -213,9 +220,7 @@ const PromoCodeForm = ({
           disabled={submitting}
           className="px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {submitting
-            ? mode === 'create' ? 'Creating…' : 'Saving…'
-            : mode === 'create' ? 'Create Promo Code' : 'Save Changes'}
+          {getSubmitLabel()}
         </button>
       </div>
     </form>

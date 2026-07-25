@@ -1,3 +1,5 @@
+'use strict';
+
 require('dotenv').config();
 
 /**
@@ -12,7 +14,7 @@ module.exports = {
       port: parseInt(process.env.DB_PORT, 10) || 5432,
       database: process.env.DB_NAME || 'ecommerce_dev',
       user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres',
+      password: process.env.DB_PASSWORD,
     },
     migrations: {
       directory: './src/db/migrations',
@@ -34,7 +36,7 @@ module.exports = {
       port: parseInt(process.env.TEST_DB_PORT, 10) || 5432,
       database: process.env.TEST_DB_NAME || 'ecommerce_test',
       user: process.env.TEST_DB_USER || 'postgres',
-      password: process.env.TEST_DB_PASSWORD || 'postgres',
+      password: process.env.TEST_DB_PASSWORD,
     },
     migrations: {
       directory: './src/db/migrations',

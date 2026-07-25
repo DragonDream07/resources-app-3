@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const EMPTY_SKU = { sku_code: '', size: '', color: '', price: '', stock: '', is_active: true };
 
@@ -51,7 +51,7 @@ const ProductForm = ({
     }));
   };
 
-  const handleSkuChange = (index, e) => {
+  const handleSkuChange = useCallback((index, e) => {
     const { name, value, type, checked } = e.target;
     setSkus((prev) => {
       const updated = [...prev];
@@ -61,15 +61,15 @@ const ProductForm = ({
       };
       return updated;
     });
-  };
+  }, []);
 
   const addSku = () => {
     setSkus((prev) => [...prev, { ...EMPTY_SKU }]);
   };
 
-  const removeSku = (index) => {
+  const removeSku = useCallback((index) => {
     setSkus((prev) => prev.filter((_, i) => i !== index));
-  };
+  }, []);
 
   const handleImageChange = (e) => {
     setImages(Array.from(e.target.files));
@@ -80,6 +80,11 @@ const ProductForm = ({
     if (onSubmit) {
       onSubmit({ ...form, skus, images });
     }
+  };
+
+  const getSubmitLabel = () => {
+    if (submitting) return mode === 'create' ? 'Creating…' : 'Saving…';
+    return mode === 'create' ? 'Create Product' : 'Save Changes';
   };
 
   return (
@@ -205,94 +210,14 @@ const ProductForm = ({
 
         <div className="space-y-4">
           {skus.map((sku, index) => (
-            <div
+            <SkuRow
               key={index}
-              className="border border-gray-200 rounded-lg p-4 bg-gray-50 relative"
-            >
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">SKU Code</label>
-                  <input
-                    type="text"
-                    name="sku_code"
-                    value={sku.sku_code}
-                    onChange={(e) => handleSkuChange(index, e)}
-                    placeholder="e.g. PROD-RED-L"
-                    className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Size</label>
-                  <input
-                    type="text"
-                    name="size"
-                    value={sku.size}
-                    onChange={(e) => handleSkuChange(index, e)}
-                    placeholder="e.g. L"
-                    className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Color</label>
-                  <input
-                    type="text"
-                    name="color"
-                    value={sku.color}
-                    onChange={(e) => handleSkuChange(index, e)}
-                    placeholder="e.g. Red"
-                    className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Price</label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={sku.price}
-                    onChange={(e) => handleSkuChange(index, e)}
-                    min="0"
-                    step="0.01"
-                    placeholder="0.00"
-                    className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Stock</label>
-                  <input
-                    type="number"
-                    name="stock"
-                    value={sku.stock}
-                    onChange={(e) => handleSkuChange(index, e)}
-                    min="0"
-                    placeholder="0"
-                    className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <div className="flex items-end gap-2 pb-1">
-                  <input
-                    type="checkbox"
-                    name="is_active"
-                    id={`sku-active-${index}`}
-                    checked={sku.is_active}
-                    onChange={(e) => handleSkuChange(index, e)}
-                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                  />
-                  <label className="text-xs font-medium text-gray-600" htmlFor={`sku-active-${index}`}>
-                    Active
-                  </label>
-                </div>
-              </div>
-
-              {skus.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeSku(index)}
-                  className="absolute top-3 right-3 text-red-400 hover:text-red-600 text-xs font-medium"
-                >
-                  Remove
-                </button>
-              )}
-            </div>
+              sku={sku}
+              index={index}
+              showRemove={skus.length > 1}
+              onChange={handleSkuChange}
+              onRemove={removeSku}
+            />
           ))}
         </div>
       </div>
@@ -303,12 +228,103 @@ const ProductForm = ({
           disabled={submitting}
           className="px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {submitting
-            ? mode === 'create' ? 'Creating…' : 'Saving…'
-            : mode === 'create' ? 'Create Product' : 'Save Changes'}
+          {getSubmitLabel()}
         </button>
       </div>
     </form>
+  );
+};
+
+const SkuRow = ({ sku, index, showRemove, onChange, onRemove }) => {
+  const handleChange = useCallback((e) => onChange(index, e), [onChange, index]);
+  const handleRemove = useCallback(() => onRemove(index), [onRemove, index]);
+
+  return (
+    <div className="border border-gray-200 rounded-lg p-4 bg-gray-50 relative">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">SKU Code</label>
+          <input
+            type="text"
+            name="sku_code"
+            value={sku.sku_code}
+            onChange={handleChange}
+            placeholder="e.g. PROD-RED-L"
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Size</label>
+          <input
+            type="text"
+            name="size"
+            value={sku.size}
+            onChange={handleChange}
+            placeholder="e.g. L"
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Color</label>
+          <input
+            type="text"
+            name="color"
+            value={sku.color}
+            onChange={handleChange}
+            placeholder="e.g. Red"
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Price</label>
+          <input
+            type="number"
+            name="price"
+            value={sku.price}
+            onChange={handleChange}
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-600 mb-1">Stock</label>
+          <input
+            type="number"
+            name="stock"
+            value={sku.stock}
+            onChange={handleChange}
+            min="0"
+            placeholder="0"
+            className="w-full border border-gray-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div className="flex items-end gap-2 pb-1">
+          <input
+            type="checkbox"
+            name="is_active"
+            id={`sku-active-${index}`}
+            checked={sku.is_active}
+            onChange={handleChange}
+            className="h-4 w-4 text-indigo-600 border-gray-300 rounded"
+          />
+          <label className="text-xs font-medium text-gray-600" htmlFor={`sku-active-${index}`}>
+            Active
+          </label>
+        </div>
+      </div>
+
+      {showRemove && (
+        <button
+          type="button"
+          onClick={handleRemove}
+          className="absolute top-3 right-3 text-red-400 hover:text-red-600 text-xs font-medium"
+        >
+          Remove
+        </button>
+      )}
+    </div>
   );
 };
 

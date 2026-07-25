@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 
 const SORT_ASC = 'asc';
 const SORT_DESC = 'desc';
@@ -21,7 +21,7 @@ const AdminDataTable = ({
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
-  const handleSort = (colKey) => {
+  const handleSort = useCallback((colKey) => {
     if (!colKey) return;
     let newDir = SORT_ASC;
     if (sortColumn === colKey) {
@@ -32,7 +32,7 @@ const AdminDataTable = ({
     if (onSortChange) {
       onSortChange(colKey, newDir);
     }
-  };
+  }, [sortColumn, sortDir, onSortChange]);
 
   const sortedData = useMemo(() => {
     if (!sortColumn || onSortChange) return data;
@@ -52,6 +52,20 @@ const AdminDataTable = ({
         {sortDir === SORT_ASC ? '↑' : '↓'}
       </span>
     );
+  };
+
+  const handlePageFirst = useCallback(() => { if (onPageChange) onPageChange(1); }, [onPageChange]);
+  const handlePagePrev = useCallback(() => { if (onPageChange) onPageChange(page - 1); }, [onPageChange, page]);
+  const handlePageNext = useCallback(() => { if (onPageChange) onPageChange(page + 1); }, [onPageChange, page]);
+  const handlePageLast = useCallback(() => { if (onPageChange) onPageChange(totalPages); }, [onPageChange, totalPages]);
+
+  const skeletonRowCount = pageSize > 5 ? 5 : pageSize;
+
+  const getPageNum = (i, totalPagesCount, currentPage) => {
+    if (totalPagesCount <= 5) return i + 1;
+    if (currentPage <= 3) return i + 1;
+    if (currentPage >= totalPagesCount - 2) return totalPagesCount - 4 + i;
+    return currentPage - 2 + i;
   };
 
   return (
@@ -83,7 +97,7 @@ const AdminDataTable = ({
 
           <tbody className="bg-white divide-y divide-gray-100">
             {loading ? (
-              Array.from({ length: pageSize > 5 ? 5 : pageSize }).map((_, i) => (
+              Array.from({ length: skeletonRowCount }).map((_, i) => (
                 <tr key={`skeleton-${i}`}>
                   {columns.map((col) => (
                     <td key={col.key} className="px-4 py-3">
@@ -140,14 +154,14 @@ const AdminDataTable = ({
           </span>
           <div className="flex items-center gap-1">
             <button
-              onClick={() => onPageChange && onPageChange(1)}
+              onClick={handlePageFirst}
               disabled={page === 1}
               className="px-2 py-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-100 transition-colors"
             >
               «
             </button>
             <button
-              onClick={() => onPageChange && onPageChange(page - 1)}
+              onClick={handlePagePrev}
               disabled={page === 1}
               className="px-2 py-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-100 transition-colors"
             >
@@ -155,16 +169,7 @@ const AdminDataTable = ({
             </button>
 
             {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
-              let pageNum;
-              if (totalPages <= 5) {
-                pageNum = i + 1;
-              } else if (page <= 3) {
-                pageNum = i + 1;
-              } else if (page >= totalPages - 2) {
-                pageNum = totalPages - 4 + i;
-              } else {
-                pageNum = page - 2 + i;
-              }
+              const pageNum = getPageNum(i, totalPages, page);
               return (
                 <button
                   key={pageNum}
@@ -181,14 +186,14 @@ const AdminDataTable = ({
             })}
 
             <button
-              onClick={() => onPageChange && onPageChange(page + 1)}
+              onClick={handlePageNext}
               disabled={page === totalPages}
               className="px-2 py-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-100 transition-colors"
             >
               ›
             </button>
             <button
-              onClick={() => onPageChange && onPageChange(totalPages)}
+              onClick={handlePageLast}
               disabled={page === totalPages}
               className="px-2 py-1 rounded border border-gray-300 disabled:opacity-40 hover:bg-gray-100 transition-colors"
             >

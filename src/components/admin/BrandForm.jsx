@@ -41,6 +41,11 @@ const BrandForm = ({
     }
   };
 
+  const getSubmitLabel = () => {
+    if (submitting) return mode === 'create' ? 'Creating…' : 'Saving…';
+    return mode === 'create' ? 'Create Brand' : 'Save Changes';
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
@@ -113,9 +118,7 @@ const BrandForm = ({
           disabled={submitting}
           className="px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {submitting
-            ? mode === 'create' ? 'Creating…' : 'Saving…'
-            : mode === 'create' ? 'Create Brand' : 'Save Changes'}
+          {getSubmitLabel()}
         </button>
       </div>
     </form>
