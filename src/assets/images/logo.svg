@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 32" width="120" height="32" fill="none" aria-label="Logo">
+  <rect x="0" y="4" width="24" height="24" rx="6" fill="#4c6ef5"/>
+  <path d="M6 8L4 11v10a1.5 1.5 0 001.5 1.5h11A1.5 1.5 0 0018 21V11l-2-3z" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="4" y1="11" x2="18" y2="11" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M14.5 13.5a2.5 2.5 0 01-5 0" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="32" y="22" font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="-0.02em" fill="#212529">Shop</text>
+  <text x="72" y="22" font-family="'Inter','Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="700" letter-spacing="-0.02em" fill="#4c6ef5">Co</text>
+</svg>

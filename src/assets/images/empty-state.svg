@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" fill="none" aria-label="Empty state illustration">
+  <rect width="200" height="200" rx="16" fill="#f8f9fa"/>
+  <!-- Box outline -->
+  <rect x="55" y="70" width="90" height="75" rx="8" fill="#e8ecfd" stroke="#4c6ef5" stroke-width="2"/>
+  <!-- Box lid -->
+  <path d="M55 90h90" stroke="#4c6ef5" stroke-width="2" stroke-linecap="round"/>
+  <path d="M80 70v-10a2 2 0 012-2h36a2 2 0 012 2v10" fill="#e8ecfd" stroke="#4c6ef5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Opening flap left -->
+  <path d="M55 90l25-18" stroke="#4c6ef5" stroke-width="2" stroke-linecap="round"/>
+  <!-- Opening flap right -->
+  <path d="M145 90l-25-18" stroke="#4c6ef5" stroke-width="2" stroke-linecap="round"/>
+  <!-- Sad face in the box -->
+  <circle cx="100" cy="120" r="18" fill="#ffffff" stroke="#868e96" stroke-width="1.5"/>
+  <circle cx="94" cy="116" r="1.5" fill="#495057"/>
+  <circle cx="106" cy="116" r="1.5" fill="#495057"/>
+  <path d="M94 126a6 6 0 0012 0" stroke="#495057" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Stars / sparkles to suggest emptiness -->
+  <circle cx="44" cy="55" r="3" fill="#fd7e14" opacity="0.5"/>
+  <circle cx="160" cy="65" r="2" fill="#4c6ef5" opacity="0.4"/>
+  <circle cx="152" cy="155" r="3" fill="#fd7e14" opacity="0.4"/>
+  <circle cx="46" cy="148" r="2" fill="#4c6ef5" opacity="0.5"/>
+  <!-- Label below -->
+  <rect x="65" y="158" width="70" height="8" rx="4" fill="#adb5bd"/>
+  <rect x="78" y="172" width="44" height="6" rx="3" fill="#adb5bd"/>
+</svg>
