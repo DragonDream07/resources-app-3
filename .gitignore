@@ -1,9 +1,33 @@
-__pycache__/
-*.pyc
-.venv/
-.py_packages/
-.env
+# ── Dependencies ───────────────────────────────────────────────────────────────
 node_modules/
+
+# ── Build / compiled output ────────────────────────────────────────────────────
 dist/
 build/
+
+# ── Environment files (may contain secrets) ───────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Test artefacts ────────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+
+# ── OS / editor artefacts ─────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Knex ──────────────────────────────────────────────────────────────────────
+# (knex_migrations table lives in the DB; nothing to ignore here)
